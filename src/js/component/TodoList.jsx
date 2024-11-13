@@ -164,19 +164,17 @@ export const TodoList = () => {
                     {list.map((task, index) => {
                         <li key={index}>{task.label}</li>
                     } )}
-                    {/* {list.map((task) => {
-                        console.log("Aquí está mi tarea",task);
-                        
+                     {list.map((task) => (
                         <div className="row" key={task.id}>
                             <li className="col-8">
                                 <p>{task.label}</p>
-                            {/* <button className="modify-button col-2" onClick={() => handleEdit(task)}>
+                             <button className="modify-button col-2" onClick={() => handleEdit(task)}>
                                 Modificar
                             </button>
                             <button className="delete-button col-2" onClick={() => handleDelete(task.id)}>
                                 <i className="fa-solid fa-trash"></i>
-                            </button> */}
-                                {/* {task.id === editedTodo?.id ? (
+                            </button> 
+                                 {task.id === editedTodo?.id ? (
                                     <>
                                     <input
                                         type="text"
@@ -191,10 +189,11 @@ export const TodoList = () => {
                                     </>
                                 ) : (
                                     <span>{task.label}</span>
-                                )} */}
-                            {/* </li>
+                                )} 
+                             </li>
                         </div>
-                    })} */} 
+                    ))}) 
+                    
                 </ul>
             </div> 
             

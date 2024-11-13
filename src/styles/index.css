@@ -3,7 +3,7 @@
     justify-content: center;
     
 }
-/* body {
+body {
     margin: 0;
     background-image : url("https://img.freepik.com/foto-gratis/pizarra-decorativa-sobre-superficie-corcho_23-2147608821.jpg?t=st=1730140431~exp=1730144031~hmac=4a30199b142ea6aad40e2aa9b1c398f9db84d98741f5e0b1ef0fb126655a21ce&w=996");
     background-position: center;
@@ -11,7 +11,7 @@
     background-repeat: no-repeat;
     height: 100vh;
 
-} */
+}
 
 .pizarra {
     padding-left: 20%;
