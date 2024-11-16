@@ -6,10 +6,10 @@ export const TodoList = () => {
     const [newTask, setNewTask] = useState("");
     const [editedTodo, setEditedTodo] = useState(null);
     console.log("Aquí están mis tareas", list);
-    
+
     const handleChange = (event) => {
         // event.target.value  tiene el valor del input
-        console.log(newTask);
+        // console.log(newTask);
 
         setNewTask(event.target.value)
 
@@ -21,77 +21,77 @@ export const TodoList = () => {
                 "label": newTask,
                 "is_done": false
             };
-            console.log("contenido de task",taskToSent);
-            
+            console.log("contenido de task", taskToSent);
+
             const response = await fetch(`https://playground.4geeks.com/todo/todos/AlbaReverte`, {
                 method: "POST",
                 headers: {
-                   
+
                     "Content-Type": "application/json"
                 },
                 body: JSON.stringify(taskToSent),
             });
-            console.log("respuesta:",response.status);
-            
+            console.log("respuesta:", response.status);
+
             if (!response.ok) {
                 throw new Error("Error al crear la tarea");
             }
 
-                const result = await response.json()
-                console.log("tarea guardada:",result);
-        }catch (error) {
+            const result = await response.json()
+            console.log("tarea guardada:", result);
+        } catch (error) {
             console.log(error);
         }
-        };
+    };
 
-    const editTodo = async (task,text) => {
+
+    const editTodo = async (task, text) => {
         try {
-            const response = await fetch(`https://playground.4geeks.com/todo/todos/${task.id}`,{
+    
+          const updatedTask = { ...task, label: text };  
+      
+          const response = await fetch(`https://playground.4geeks.com/todo/todos/${task.id}`, {
             method: "PUT",
             headers: {
-               
-                "Content-Type": "application/json"
+              "Content-Type": "application/json",
+              
             },
-            body: JSON.stringify({
-                "label": text
-                
-            }),
-            })
-        if (!response.ok) {
-            throw new Error("Error al crear la tarea");
-
+            body: JSON.stringify(updatedTask),
+          });
+      
+          if (!response.ok) {
+            throw new Error("Error updating task");
+          }
+      
+          const result = await response.json();
+          const updatedTodos = list.map((todo) =>
+            todo.id === task.id ? { ...todo, ...result } : todo 
+          );
+          setList(updatedTodos);
+        } catch (error) {
+          console.log(error);
         }
-        const result = await response.json()
-        const updatedTodos = list.map((todo) =>
-            todo.id === task.id ? { ...todo, label: result.label } : todo
-        );
-        setList(updatedTodos)
-    }
-        
+      };
+
+
+    const getTask = async () => {
+        try {
+            const response = await fetch("https://playground.4geeks.com/todo/users/AlbaReverte")
+            if (!response.ok) {
+                throw new Error("Error al crear la tarea");
+            }
+            const result = await response.json()
+            console.log("guardado con éxito:", result); Text
+            setList(result.todos)
+        }
 
         catch (error) {
-                console.log(error);
-                
+            console.log(error);
         }
     }
 
-        const getTask  = async () => {
-            try {
-                const response = await fetch ("https://playground.4geeks.com/todo/users/AlbaReverte")
-                if (!response.ok) {
-                    throw new Error("Error al crear la tarea");
-                }
-                const result = await response.json()
-                console.log("guardado con éxito:",result);Text
-                setList(result.todos)
-            }
-            
-             catch (error) {
-                
-            }
-        }
-
     const addTask = () => {
+        if (!newTask.trim()) return;
         const objTask = {
             id: uuidv4(),
             task: newTask
@@ -112,10 +112,29 @@ export const TodoList = () => {
     }
 
 
-    const handleDelete = (id) => {
-        const newList = list.filter(todo => todo.id !== id);
-        setList(newList);
+    // const handleDelete = (id) => {
+    //     const newList = list.filter(todo => todo.id !== id);
+    //     setList(newList);
+    // };
+    const handleDelete = async (id) => {
+        try {
+            const response = await fetch(`https://playground.4geeks.com/todo/todos/${id}`, {
+                method: "DELETE",
+                headers: {
+                    "Content-Type": "application/json"
+                }
+            });
+            if (!response.ok) {
+                throw new Error("Error al eliminar la tarea");
+            }
+            const newlist = list.filter(todo => todo.id !== id);
+            setList(newlist);
+            console.log("Tarea eliminada correctamente");
+        } catch (error) {
+            console.log("Error al eliminar la tarea:", error);
+        }
     };
+
 
 
     const pendingTasks = list.filter((todo) => !todo.completed).length;
@@ -125,33 +144,31 @@ export const TodoList = () => {
         getTask();
     }, [])
 
-    useEffect(() => {
-        const storedTodos = localStorage.getItem('todos');
-        if (storedTodos) {
-            setTodos(JSON.parse(storedTodos));
-        }
-    }, []);
+    // useEffect(() => {
+    //     const storedTodos = localStorage.getItem('todos');
+    //     if (storedTodos) {
+    //         setTodos(JSON.parse(storedTodos));
+    //     }
+    // }, []);
 
     const handleEdit = (todo) => {
         setEditedTodo(todo);
     };
 
+  
 
-    const handleSave = (editedText) => {
-        // const updatedTodos = todos.map((todo) =>
-        //     todo.id === editedTodo.id ? { ...todo, text: editedText } : todo
-        // );
-        // setTodos(updatedTodos);
-        editTodo(editedText)
+    const handleSave = async (editedText) => {
+        
+        await editTodo (todo, todo.text);
         setEditedTodo(null);
-        // localStorage.setItem('todos', JSON.stringify(updatedTodos));
+       
     };
 
 
     return (
         <div className="container">
-            <h1 className="box d-flex justify-content-center">Mi Lista de Tareas</h1>
-            <div className="box1 d-flex justify-content-center m-3">
+            <h1 className="box d-flex justify-content-center mt-3">Mi Lista de Tareas</h1>
+            <div className="box1 m-3">
                 <input
                     value={newTask}
                     type="text"
@@ -159,50 +176,50 @@ export const TodoList = () => {
                     onKeyDown={pressEnter}
                 />
             </div>
-             <div className="container d-flex justify-content-center flex-column">
+            <div className="pizarra">
                 <ul>
                     {list.map((task, index) => {
                         <li key={index}>{task.label}</li>
-                    } )}
-                     {list.map((task) => (
-                        <div className="row" key={task.id}>
-                            <li className="col-8">
-                                <p>{task.label}</p>
-                             <button className="modify-button col-2" onClick={() => handleEdit(task)}>
-                                Modificar
-                            </button>
-                            <button className="delete-button col-2" onClick={() => handleDelete(task.id)}>
-                                <i className="fa-solid fa-trash"></i>
-                            </button> 
-                                 {task.id === editedTodo?.id ? (
+                    })}
+                    {list.map((task) => (
+                        <div className="row task-list" key={task.id}>
+                            <li className="col-4">
+                            {task.id === editedTodo?.id ? (
                                     <>
-                                    <input
-                                        type="text"
-                                        value={editedTodo.text}
-                                        onChange={(e) =>
-                                            setEditedTodo({ ...editedTodo, text: e.target.value })
-                                        }
-                                    />
-                                    <button className="save-button col-2" onClick={() => handleSave(editedTodo.text)}>
-                                    Guardar
-                                    </button>
+                                        <input
+                                            type="text"
+                                            value={editedTodo.text}
+                                            onChange={(e) =>
+                                                setEditedTodo({ ...editedTodo, text: e.target.value })
+                                            }
+                                        />
+                                        <button className="save-button col-1" onClick={() => handleSave(editedTodo.text)}>
+                                            <i class="fa-regular fa-floppy-disk"></i>
+                                        </button>
                                     </>
                                 ) : (
-                                    <span>{task.label}</span>
-                                )} 
-                             </li>
+                                    <span className="task">{task.label}</span>
+                                )}
+                                <button className="modify-button col-1" onClick={() => handleEdit(task)}>
+                                    <i class="fa-solid fa-pencil"></i>
+                                </button>
+                                <button className="delete-button col-1" onClick={() => handleDelete(task.id)}>
+                                    <i className="fa-solid fa-trash"></i>
+                                </button>
+                       
+                            </li>
                         </div>
-                    ))}) 
-                    
+                    ))}
+
                 </ul>
-            </div> 
-            
+            </div>
+
             <div>
                 <footer className="foot">
                     Tareas pendientes: {pendingTasks}
                 </footer>
             </div>
         </div>
-               
-            );
-    }
+
+    );
+}
