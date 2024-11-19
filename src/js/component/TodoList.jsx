@@ -5,11 +5,10 @@ export const TodoList = () => {
     const [list, setList] = useState([]);
     const [newTask, setNewTask] = useState("");
     const [editedTodo, setEditedTodo] = useState(null);
-    console.log("Aquí están mis tareas", list);
+
 
     const handleChange = (event) => {
         // event.target.value  tiene el valor del input
-        // console.log(newTask);
 
         setNewTask(event.target.value)
 
@@ -38,6 +37,7 @@ export const TodoList = () => {
             }
 
             const result = await response.json()
+            setList(prevState => [...prevState, result])
             console.log("tarea guardada:", result);
         } catch (error) {
             console.log(error);
@@ -45,33 +45,31 @@ export const TodoList = () => {
     };
 
 
-    const editTodo = async (task, text) => {
+    const editTodo = async () => {
         try {
-    
-          const updatedTask = { ...task, label: text };  
-      
-          const response = await fetch(`https://playground.4geeks.com/todo/todos/${task.id}`, {
-            method: "PUT",
-            headers: {
-              "Content-Type": "application/json",
-              
-            },
-            body: JSON.stringify(updatedTask),
-          });
-      
-          if (!response.ok) {
-            throw new Error("Error updating task");
-          }
-      
-          const result = await response.json();
-          const updatedTodos = list.map((todo) =>
-            todo.id === task.id ? { ...todo, ...result } : todo 
-          );
-          setList(updatedTodos);
+            const response = await fetch(`https://playground.4geeks.com/todo/todos/${editedTodo.id}`, {
+                method: "PUT",
+                headers: {
+                    "Content-Type": "application/json",
+
+                },
+                body: JSON.stringify(editedTodo),
+            });
+
+            if (!response.ok) {
+                throw new Error("Error updating task");
+            }
+
+            const result = await response.json();
+            const updatedTodos = list.map((todo) =>
+                todo.id === editedTodo.id ? { ...todo, ...result } : todo
+            );
+            setList(updatedTodos);
+            setEditedTodo(null)
         } catch (error) {
-          console.log(error);
+            console.log(error);
         }
-      };
+    };
 
 
     const getTask = async () => {
@@ -92,11 +90,6 @@ export const TodoList = () => {
 
     const addTask = () => {
         if (!newTask.trim()) return;
-        const objTask = {
-            id: uuidv4(),
-            task: newTask
-        };
-        setList(prevState => [...prevState, objTask])
         setNewTask("")
         saveTask()
     }
@@ -107,15 +100,10 @@ export const TodoList = () => {
     const pressEnter = (event) => {
         if (event.key === "Enter") {
             addTask();
-            saveTask();
         }
     }
 
 
-    // const handleDelete = (id) => {
-    //     const newList = list.filter(todo => todo.id !== id);
-    //     setList(newList);
-    // };
     const handleDelete = async (id) => {
         try {
             const response = await fetch(`https://playground.4geeks.com/todo/todos/${id}`, {
@@ -144,24 +132,9 @@ export const TodoList = () => {
         getTask();
     }, [])
 
-    // useEffect(() => {
-    //     const storedTodos = localStorage.getItem('todos');
-    //     if (storedTodos) {
-    //         setTodos(JSON.parse(storedTodos));
-    //     }
-    // }, []);
 
     const handleEdit = (todo) => {
         setEditedTodo(todo);
-    };
-
-  
-
-    const handleSave = async (editedText) => {
-        
-        await editTodo (todo, todo.text);
-        setEditedTodo(null);
-       
     };
 
 
@@ -183,30 +156,31 @@ export const TodoList = () => {
                     })}
                     {list.map((task) => (
                         <div className="row task-list" key={task.id}>
-                            <li className="col-4">
-                            {task.id === editedTodo?.id ? (
+                            <li className="col-6">
+                                {task.id === editedTodo?.id ? (
                                     <>
                                         <input
                                             type="text"
                                             value={editedTodo.text}
                                             onChange={(e) =>
-                                                setEditedTodo({ ...editedTodo, text: e.target.value })
+                                                setEditedTodo({ ...editedTodo, label: e.target.value })
                                             }
                                         />
-                                        <button className="save-button col-1" onClick={() => handleSave(editedTodo.text)}>
-                                            <i class="fa-regular fa-floppy-disk"></i>
+                                        <button className="save-button col-1" onClick={editTodo}>
+                                            <i className="fa-regular fa-floppy-disk"></i>
                                         </button>
                                     </>
                                 ) : (
                                     <span className="task">{task.label}</span>
                                 )}
-                                <button className="modify-button col-1" onClick={() => handleEdit(task)}>
-                                    <i class="fa-solid fa-pencil"></i>
-                                </button>
-                                <button className="delete-button col-1" onClick={() => handleDelete(task.id)}>
+                                <button className="delete-button col-1 float-end" onClick={() => handleDelete(task.id)}>
                                     <i className="fa-solid fa-trash"></i>
                                 </button>
-                       
+                                <button className="modify-button col-1 float-end" onClick={() => handleEdit(task)}>
+                                    <i className="fa-solid fa-pencil"></i>
+                                </button>
+
+
                             </li>
                         </div>
                     ))}
